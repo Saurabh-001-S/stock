@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add this to your CSS file */
+tr:last-child td {
+    border-bottom: none;
+}
+
+.description {
+    min-width: fit-content;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body {
+    overflow: hidden;
+}
+
+.table-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    display: block;
+}
+
+.table {
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+}
+
+.table thead th {
+    position: sticky;
+    top: 0;
+    background: #333;
+    z-index: 1;
+}
+
+.table tbody tr:nth-child(even) {
+    background: #444;
+}
+
+.table tbody tr:nth-child(odd) {
+    background: #555;
+}
+
+/* Custom scrollbar styles for WebKit-based browsers */
+.table-container::-webkit-scrollbar {
+    width: 12px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #444;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 10px;
+    border: 3px solid #444;
+}
+
+/* For Firefox */
+.table-container {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #444;
+    /* Thumb and track color */
+}
+
+.container {
+    max-height: 90vh;
+    overflow-y: auto;
+    display: block;
+}
