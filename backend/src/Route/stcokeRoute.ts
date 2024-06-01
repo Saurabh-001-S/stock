@@ -53,7 +53,6 @@ stock.post('/add-stockEntry',authMiddleware ,async (req:any,res:any)  => {
                 entryReason: req.body.entryReason,
                 exitReason: req.body.exitReason,
                 description: req.body.description,
-                sl: req.body.sl,
                 pnl: req.body.pnl,
                 winlossdraw: req.body.winlossdraw,
                 image:req.body.image,
@@ -102,7 +101,6 @@ stock.put('/update-stockEntry',authMiddleware, async (req:any,res:any) => {
                 entryReason: req.body.entryReason,
                 exitReason: req.body.exitReason,
                 description: req.body.description,
-                sl: req.body.sl,
                 pnl: req.body.pnl,
                 winlossdraw: req.body.winlossdraw,
                 image:req.body.image
@@ -220,6 +218,8 @@ stock.get('/statistics', authMiddleware, async (req: any, res: any) => {
         let totalLoss = 0;
         let winCount = 0;
         let lossCount = 0;
+        let maxProfit = trades[0].pnl 
+        let minloss = trades[0].pnl 
 
         trades.forEach(trade => {
             if (trade.winlossdraw=="WIN") {
@@ -227,29 +227,41 @@ stock.get('/statistics', authMiddleware, async (req: any, res: any) => {
                 winCount++;
             } else if(trade.winlossdraw=="LOSS"){
                 totalLoss += trade.pnl;
+                if (trade.pnl > minloss) {
+                    minloss = trade.pnl;
+                }   
                 lossCount++;
+            }
+
+            // Check for max and min profit
+            if (trade.pnl > maxProfit) {
+                maxProfit = trade.pnl;
+            }
+
+            if (trade.pnl < minloss) {
+                minloss = trade.pnl;
             }
         });
 
+        console.log(minloss,maxProfit)
         const totalTrades = trades.length;
         const winPercentage = ((winCount / totalTrades) * 100).toFixed(0);
         const lossPercentage = ((lossCount / totalTrades) * 100).toFixed(0);
-        const avgPnl = ((totalProfit + totalLoss) / totalTrades).toFixed(0);
-        const avgProfit = (totalProfit/winCount).toFixed(0);
-        const avgLoss =(totalLoss/lossCount).toFixed(0);
+        const avgPnl = (totalProfit-totalLoss)
         const winRatio = `${winCount}/${trades.length}`;
+        
 
         return res.status(STATUS_CODE.SUCCESS).json({
             msg: "successfully",
             data: {
                 avgPnl: avgPnl,
-                avgProfit: avgProfit,
-                avgLoss: avgLoss,
                 winPercentage: winPercentage,
                 lossPercentage: lossPercentage,
                 winRatio: winRatio,
                 totalProfit: totalProfit,
                 totalLoss: totalLoss,
+                maxProfit: maxProfit,
+                minloss: minloss,
             },
         });
     } catch (error) {

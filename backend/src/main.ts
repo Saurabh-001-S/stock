@@ -9,14 +9,14 @@ app.use(cors())
 app.use(express.json())
 
 // Use Morgan middleware to log requests
-// app.use(morgan('combined'));
+app.use(morgan('combined'));
 // Custom middleware to log request payload
-// app.use((req:any, res:any, next:any) => {
-//     if (req.method === 'POST' || req.method === 'PUT') {
-//         console.log('Request Payload:', req.body);
-//     }
-//     next();
-// });
+app.use((req:any, res:any, next:any) => {
+    if (req.method === 'POST' || req.method === 'PUT') {
+        console.log('Request Payload:', req.body);
+    }
+    next();
+});
 
 app.use("/api/v1/userRoute", userRoute);
 app.use("/api/v1/stockRoute", stockeRoute);

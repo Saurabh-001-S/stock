@@ -1,26 +1,23 @@
 import axios from "axios";
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 type Timeframe = {
   "1 min": "MIN1";
-  "2 min": "MIN2";
   "5 min": "MIN5";
-  "1 hour": "HOUR1";
+  "15 min": "MIN15";
 };
 type WINLOSSDRAW = "WIN" | "LOSS" | "DRAW";
 
 const timeframes: Timeframe = {
   "1 min": "MIN1",
-  "2 min": "MIN2",
   "5 min": "MIN5",
-  "1 hour": "HOUR1",
+  "15 min": "MIN15",
 };
 const Objecttimeframe = {
   MIN1: "1 min",
-  MIN2: "2 min",
   MIN5: "5 min",
-  HOUR1: "1 hour",
+  MIN15: "15 min",
 };
 const winLossDrawOptions: WINLOSSDRAW[] = ["WIN", "LOSS", "DRAW"];
 
@@ -31,6 +28,7 @@ interface FormProps {
 
 const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
   const navigate = useNavigate();
+  const [imageFile, setImageFile] = useState("");
   const { id } = useParams<{ id: string }>(); // Correct usage of useParams
   const [formInput, setFormInput] = useState({
     contract: "",
@@ -53,6 +51,14 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
       ...prevState,
       [name]: value,
     }));
+  };
+
+  const handleImage = (e) => {
+    const img = e.target.files?.[0];
+    if (img) {
+      console.log(img.name);
+      setImageFile(img.name);
+    }
   };
 
   const handleEditEntry = async () => {
@@ -115,7 +121,7 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
             description: formInput.description,
             pnl: Number(formInput.pnl),
             winlossdraw: formInput.winlossdraw,
-            image: formInput.image,
+            image: `./assets/${imageFile}`,
           },
           {
             headers: {
@@ -143,9 +149,8 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
             exitReason: formInput.exitReason,
             description: formInput.description,
             pnl: Number(formInput.pnl),
-            sl: 54745,
             winlossdraw: formInput.winlossdraw,
-            image: formInput.image,
+            image: `./assets/${imageFile}`,
           },
           {
             headers: {
@@ -337,6 +342,51 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
               </div>
 
               <div className="col-span-full">
+                <label
+                  htmlFor="cover-photo"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Cover photo
+                </label>
+                <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                  <div className="text-center">
+                    <svg
+                      className="mx-auto h-12 w-12 text-gray-300"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="image"
+                        className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Upload a file</span>
+                        <input
+                          id="image"
+                          name="image"
+                          type="file"
+                          className="sr-only"
+                          // value={formInput.image}
+                          onChange={handleImage}
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-600">
+                      PNG, JPG up to 10MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* <div className="col-span-full">
                 <div className="sm:col-span-4">
                   <label
                     htmlFor="image"
@@ -359,7 +409,7 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

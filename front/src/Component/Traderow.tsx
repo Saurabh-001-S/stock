@@ -11,7 +11,7 @@ const timeframe = {
   HOUR1: "1 Hour",
 };
 
-const Traderow: React.FC = memo(() => {
+const Traderow: React.FC = memo(({ filterQuery }) => {
   const [trade, setTrade] = useState([]);
   const [modal, setModal] = useState(false);
   const [show, setShow] = useState("Img");
@@ -52,6 +52,7 @@ const Traderow: React.FC = memo(() => {
       );
 
       if (res.status === 200) {
+        console.log(res.data.data);
         const tradeEntries = res.data.data.map((data) => ({
           id: data.id,
           contract: data.contract,
@@ -107,71 +108,77 @@ const Traderow: React.FC = memo(() => {
         {trade === null ? (
           <h3>Some thing wrong happen, Please refresh the page! </h3>
         ) : (
-          trade.map((row, index) => (
-            <tr id={row.id}>
-              <td className={`${rowClass} text-white`}>{index + 1}</td>
-              <td className={`${rowClass} text-white`}>{row.contract}</td>
-              <td className={`${rowClass} text-white`}>
-                {row.date.slice(0, 10)}
-              </td>
-              <td className={`${rowClass} text-white`}>
-                {timeframe[row.entryTimeFrame]}
-              </td>
-              <td className={`${rowClass} description text-white`}>
-                {row.entryReason}
-              </td>
-              <td className={`${rowClass} description text-white`}>
-                {row.exitReason}
-              </td>
-              <td className={`${rowClass} description text-white`}>
-                {row.description}
-              </td>
-              {/* <td className={rowClass}>{row.sl}</td> */}
-              <td className={`text-white ${rowClass}`}>{row.pnl}</td>
-              {row.winlossdraw === "WIN" && (
-                <td className={`text-green-500 ${rowClass} `}>
-                  {row.winlossdraw}
+          trade
+            .filter((item) => {
+              return filterQuery == ""
+                ? item
+                : item.winlossdraw.includes(filterQuery);
+            })
+            .map((row, index) => (
+              <tr id={row.id}>
+                <td className={`${rowClass} text-white`}>{index + 1}</td>
+                <td className={`${rowClass} text-white`}>{row.contract}</td>
+                <td className={`${rowClass} text-white`}>
+                  {row.date.slice(0, 10)}
                 </td>
-              )}
-              {row.winlossdraw === "LOSS" && (
-                <td className={`text-red-500 ${rowClass}`}>
-                  {row.winlossdraw}
+                <td className={`${rowClass} text-white`}>
+                  {timeframe[row.entryTimeFrame]}
                 </td>
-              )}
-              {row.winlossdraw === "DRAW" && (
-                <td className={`text-gray-200 ${rowClass} `}>
-                  {row.winlossdraw}
+                <td className={`${rowClass} description text-white`}>
+                  {row.entryReason}
                 </td>
-              )}
-              <td className={`${rowClass} text-center text-white`}>
-                <button
-                  className="text-white bg-blue-600 px-2 py-1 rounded-md"
-                  onClick={() => {
-                    console.log(row.image);
-                    handleView(row.image);
-                  }}
-                >
-                  View
-                </button>
-              </td>
-              <td className={`text-white ${rowClass}`}>
-                <button
-                  className="text-white bg-blue-600 px-2 py-1 rounded-md"
-                  onClick={() => handleEdit(row.id)}
-                >
-                  Edit
-                </button>
-              </td>
-              <td className={`text-white ${rowClass}`}>
-                <button
-                  // className="text-white bg-blue-600 px-2 py-1 rounded-md"
-                  onClick={() => handleDelete(row.id)}
-                >
-                  <Trash color="#b42727" />
-                </button>
-              </td>
-            </tr>
-          ))
+                <td className={`${rowClass} description text-white`}>
+                  {row.exitReason}
+                </td>
+                <td className={`${rowClass} description text-white`}>
+                  {row.description}
+                </td>
+                {/* <td className={rowClass}>{row.sl}</td> */}
+                <td className={`text-white ${rowClass}`}>{row.pnl}</td>
+                {row.winlossdraw === "WIN" && (
+                  <td className={`text-green-500 ${rowClass} `}>
+                    {row.winlossdraw}
+                  </td>
+                )}
+                {row.winlossdraw === "LOSS" && (
+                  <td className={`text-red-500 ${rowClass}`}>
+                    {row.winlossdraw}
+                  </td>
+                )}
+                {row.winlossdraw === "DRAW" && (
+                  <td className={`text-gray-200 ${rowClass} `}>
+                    {row.winlossdraw}
+                  </td>
+                )}
+                <td className={`${rowClass} text-center text-white`}>
+                  <button
+                    className="text-white bg-blue-600 px-2 py-1 rounded-md"
+                    onClick={() => {
+                      console.log(row.image);
+                      handleView(row.image);
+                    }}
+                  >
+                    View
+                  </button>
+                </td>
+                <td className={`text-white ${rowClass}`}>
+                  <button
+                    className="text-white bg-blue-600 px-2 py-1 rounded-md"
+                    onClick={() => handleEdit(row.id)}
+                  >
+                    Edit
+                  </button>
+                </td>
+                <td className={`text-white ${rowClass}`}>
+                  <button
+                    // className="text-white bg-blue-600 px-2 py-1 rounded-md"
+                    onClick={() => handleDelete(row.id)}
+                  >
+                    <Trash color="#b42727" />
+                  </button>
+                </td>
+              </tr>
+            ))
         )}
       </tbody>
     </>

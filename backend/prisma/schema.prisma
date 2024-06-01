@@ -15,9 +15,8 @@ enum WinLossOrDraw {
 
 enum entryTimeFrame {
   MIN1
-  MIN2
   MIN5
-  HOUR1
+  MIN15
 }
 
 model User {
@@ -36,7 +35,6 @@ model Trade {
   entryReason    String
   exitReason     String
   description    String
-  sl             Int
   pnl            Int
   winlossdraw    WinLossOrDraw
   User           User?          @relation(fields: [userId], references: [id])

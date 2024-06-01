@@ -63,7 +63,6 @@ user.post('/signup', async (req: any, res: any) => {
 user.post('/signin', async (req: any, res: any) => {
     const prisma = new PrismaClient();
     try {
-        console.log(req.body.username)
         const user = await prisma.user.findFirst({
             where: {
                 username: req.body.username
@@ -103,61 +102,5 @@ user.post('/signin', async (req: any, res: any) => {
         await prisma.$disconnect();
     }
 });
-
-
-// user.post('/login', async (req:any, res:any) => {
-//     const prisma = new PrismaClient();
-//     try {
-//         const username= req.body.username
-//         const password= req.body.password
-        
-//         console.log(req.body,username,password)
-//         // Check if the username and password are provided
-//         if (!username || !password) {
-//             return res.status(STATUS_CODE.UNAUTHORIZED).json({
-//                 msg: "Username and password are required."
-//             });
-//         }
-
-//         const user = await prisma.user.findFirst({
-//             where: {
-//                 username: username
-//             }
-//         });
-
-//         if (!user) {
-//             return res.status(STATUS_CODE.NOTFOUND).json({
-//                 msg: "User not found with the provided username. Please check and try again."
-//             });
-//         }
-
-//         // Compare password hash
-//         const isPasswordMatch = await bcrypt.compare(password, user.password);
-//         if (!isPasswordMatch) {
-//             return res.status(STATUS_CODE.UNAUTHORIZED).json({
-//                 msg: "Incorrect password. Please try again."
-//             });
-//         }
-
-//         // Sign JWT token
-//         const token = jwt.sign({ id: user.id }, JWT_SECRET);
-
-//         return res.status(STATUS_CODE.SUCCESS).json({
-//             msg: "Login successful",
-//             token: token,
-//             data: user
-//         });
-
-//     } catch (error:any) {
-//         console.error(error);
-//         return res.status(STATUS_CODE.ERROR).json({
-//             msg: "Internal server error",
-//             error: error.message
-//         });
-//     } finally {
-//         await prisma.$disconnect();
-//     }
-// });
-
 
 module.exports = user;

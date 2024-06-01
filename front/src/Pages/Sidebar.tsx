@@ -20,9 +20,8 @@ const Sidebar = () => {
           },
         }
       );
-      console.log(res);
       if (res.status == 200) {
-        console.log(res.data.data);
+        // console.log(res.data.data);
         setStat(res.data.data);
       }
     } catch (error) {
@@ -45,16 +44,20 @@ const Sidebar = () => {
       ) : (
         <div>
           <div className={card}>
-            <h3 className={cardH3}>Avg P&L</h3>
-            <p className={`${cardP} text-gray-300`}>{stat.avgPnl}</p>
+            <h3 className={cardH3}>Total P&L</h3>
+            {stat.avgPnl < 0 ? (
+              <p className={`${cardP} text-red-500`}>{stat.avgPnl}</p>
+            ) : (
+              <p className={`${cardP} text-green-400`}>{stat.avgPnl}</p>
+            )}
           </div>
           <div className={card}>
-            <h3 className={cardH3}>Avg Profit</h3>
-            <p className={`${cardP} text-green-400`}>{stat.avgProfit}</p>
+            <h3 className={cardH3}>Maximum Profit</h3>
+            <p className={`${cardP} text-green-400`}>{stat.maxProfit}</p>
           </div>
           <div className={card}>
-            <h3 className={cardH3}>Avg Loss</h3>
-            <p className={`${cardP} text-red-500`}>{stat.avgLoss}</p>
+            <h3 className={cardH3}>Minimum Loss</h3>
+            <p className={`${cardP} text-red-500`}>{stat.minloss}</p>
           </div>
           <div className={card}>
             <h3 className={cardH3}>Win Percentage</h3>
