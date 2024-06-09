@@ -27,7 +27,7 @@ const StockList: React.FC = memo(() => {
   }, []);
 
   return (
-    <div className="p-4 flex items-top justify-start h-svh w-3/4 flex-col items-center">
+    <div className="p-4 flex items-top justify-start h-svh flex-col items-center">
       <div className="p-4 flex gap-10 items-center justify-between w-1/2">
         <div className="bzv">
           <h1 className="font-bold text-4xl text-white">Users</h1>
@@ -89,6 +89,9 @@ const StockList: React.FC = memo(() => {
               </th>
               <th scope="col" className={`${thClass} w-12`}>
                 WLD
+              </th>
+              <th scope="col" className={`${thClass} w-12`}>
+                Region
               </th>
               <th scope="col" className={`${thClass} w-16 text-center`}>
                 IMG

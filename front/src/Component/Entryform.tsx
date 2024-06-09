@@ -8,6 +8,7 @@ type Timeframe = {
   "15 min": "MIN15";
 };
 type WINLOSSDRAW = "WIN" | "LOSS" | "DRAW";
+type REGION = "IND" | "FOREX";
 
 const timeframes: Timeframe = {
   "1 min": "MIN1",
@@ -20,6 +21,7 @@ const Objecttimeframe = {
   MIN15: "15 min",
 };
 const winLossDrawOptions: WINLOSSDRAW[] = ["WIN", "LOSS", "DRAW"];
+const Region: REGION[] = ["IND", "FOREX"];
 
 interface FormProps {
   setModal?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -39,6 +41,8 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
     pnl: 0,
     winlossdraw: "DRAW",
     image: "",
+    brokerage: 0,
+    region: "",
   });
 
   const handleChange = (
@@ -88,6 +92,8 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
           description: entry.description,
           pnl: entry.pnl,
           winlossdraw: entry.winlossdraw,
+          region: formInput.region,
+          brokerage: formInput.brokerage,
           image: entry.image,
         });
       }
@@ -121,6 +127,8 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
             description: formInput.description,
             pnl: Number(formInput.pnl),
             winlossdraw: formInput.winlossdraw,
+            region: formInput.region,
+            brokerage: Number(formInput.brokerage),
             image: `./assets/${imageFile}`,
           },
           {
@@ -150,6 +158,8 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
             description: formInput.description,
             pnl: Number(formInput.pnl),
             winlossdraw: formInput.winlossdraw,
+            region: formInput.region,
+            brokerage: Number(formInput.brokerage),
             image: `./assets/${imageFile}`,
           },
           {
@@ -341,6 +351,50 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
                 </div>
               </div>
 
+              <div className="sm:col-span-3">
+                <label
+                  htmlFor="brokerage"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Brokerage
+                </label>
+                <div className="mt-2">
+                  <input
+                    type="number"
+                    name="brokerage"
+                    id="brokerage"
+                    value={formInput.brokerage}
+                    onChange={handleChange}
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  />
+                </div>
+              </div>
+
+              <div className="bud">
+                <label
+                  htmlFor="region"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Region
+                </label>
+                <div className="lb">
+                  <select
+                    id="region"
+                    name="region"
+                    autoComplete="region"
+                    className="block flex-1 border-2 bg-transparent py-1.5 pl-1 border-gray-300 rounded-md text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                    value={formInput.region}
+                    onChange={handleChange}
+                  >
+                    {Region.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div className="col-span-full">
                 <label
                   htmlFor="cover-photo"
@@ -385,31 +439,6 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
                   </div>
                 </div>
               </div>
-
-              {/* <div className="col-span-full">
-                <div className="sm:col-span-4">
-                  <label
-                    htmlFor="image"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Image
-                  </label>
-                  <div className="mt-2">
-                    <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                      <input
-                        type="text"
-                        name="image"
-                        id="image"
-                        autoComplete="contract"
-                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                        placeholder="contract"
-                        value={formInput.image}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div> */}
             </div>
           </div>
         </div>

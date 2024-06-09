@@ -64,6 +64,7 @@ const Traderow: React.FC = memo(({ filterQuery }) => {
           pnl: data.pnl,
           winlossdraw: data.winlossdraw,
           image: data.image,
+          region: data.region,
         }));
         setTrade(tradeEntries);
         return tradeEntries;
@@ -150,6 +151,7 @@ const Traderow: React.FC = memo(({ filterQuery }) => {
                     {row.winlossdraw}
                   </td>
                 )}
+                <td className={`${rowClass} text-white`}>{row.region}</td>
                 <td className={`${rowClass} text-center text-white`}>
                   <button
                     className="text-white bg-blue-600 px-2 py-1 rounded-md"

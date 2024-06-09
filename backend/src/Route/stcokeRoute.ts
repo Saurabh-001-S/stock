@@ -56,7 +56,9 @@ stock.post('/add-stockEntry',authMiddleware ,async (req:any,res:any)  => {
                 pnl: req.body.pnl,
                 winlossdraw: req.body.winlossdraw,
                 image:req.body.image,
-                userId:req.userId
+                region:req.body.region,
+                userId: req.userId,
+                brokerage:req.body.brokerage
             }
         })
 
@@ -103,7 +105,9 @@ stock.put('/update-stockEntry',authMiddleware, async (req:any,res:any) => {
                 description: req.body.description,
                 pnl: req.body.pnl,
                 winlossdraw: req.body.winlossdraw,
-                image:req.body.image
+                image: req.body.image,
+                region:req.body.region,
+                brokerage:req.body.brokerage
             },
             where: {
                 id: req.body.id,
@@ -116,6 +120,7 @@ stock.put('/update-stockEntry',authMiddleware, async (req:any,res:any) => {
             data: response
         })
     } catch (error) {
+        console.log(error)
         return res.status(STATUS_CODE.ERROR).json({
                 msg: `Internal server error`,
                 error:error
@@ -214,54 +219,123 @@ stock.get('/statistics', authMiddleware, async (req: any, res: any) => {
             });
         }
 
-        let totalProfit = 0;
-        let totalLoss = 0;
-        let winCount = 0;
-        let lossCount = 0;
-        let maxProfit = trades[0].pnl 
-        let minloss = trades[0].pnl 
+        let IND_totalProfit = 0;
+        let IND_totalLoss = 0;
+        let IND_winCount = 0;
+        let IND_lossCount = 0;
+        let IND_maxProfit = 0;
+        let IND_minloss = 0;
+        let IND_brokerage = 0;
+        
+        let FRX_totalProfit = 0;
+        let FRX_totalLoss = 0;
+        let FRX_winCount = 0;
+        let FRX_lossCount = 0;
+        let FRX_maxProfit = 0;
+        let FRX_minloss = 0;
+        let FRX_brokerage = 0;
 
         trades.forEach(trade => {
-            if (trade.winlossdraw=="WIN") {
-                totalProfit += trade.pnl;
-                winCount++;
-            } else if(trade.winlossdraw=="LOSS"){
-                totalLoss += trade.pnl;
-                if (trade.pnl > minloss) {
-                    minloss = trade.pnl;
+
+            if (trade.region == "IND" && trade.winlossdraw=="WIN") {
+                IND_maxProfit = trade.pnl;
+            }
+            if (trade.region == "IND" && trade.winlossdraw=="LOSS") {
+                IND_minloss = trade.pnl;
+            }
+
+            if (trade.region == "FOREX" && trade.winlossdraw=="WIN") {
+                FRX_maxProfit = trade.pnl;
+            }
+            if (trade.region == "FOREX" && trade.winlossdraw=="LOSS") {
+                FRX_minloss = trade.pnl;
+            }
+
+
+            if (trade.winlossdraw=="WIN" && trade.region=="IND") {
+                IND_totalProfit += trade.pnl;
+                IND_brokerage += trade.brokerage;
+                IND_winCount++;
+            } else if(trade.winlossdraw=="LOSS" && trade.region=="IND"){
+                IND_totalLoss += trade.pnl;
+                IND_brokerage += trade.brokerage;
+                if (trade.pnl > IND_minloss) {
+                    IND_minloss = trade.pnl;
                 }   
-                lossCount++;
+                IND_lossCount++;
+            } else if (trade.winlossdraw == "DRAW" && trade.region == "IND") {
+                IND_brokerage += trade.brokerage;
             }
 
-            // Check for max and min profit
-            if (trade.pnl > maxProfit) {
-                maxProfit = trade.pnl;
+
+            if (trade.winlossdraw=="WIN" && trade.region=="FOREX") {
+                FRX_totalProfit += trade.pnl;
+                FRX_brokerage += trade.brokerage;
+                FRX_winCount++;
+            } else if(trade.winlossdraw=="LOSS" && trade.region=="FOREX"){
+                FRX_totalLoss += trade.pnl;
+                FRX_brokerage += trade.brokerage;
+                if (trade.pnl > FRX_minloss) {
+                    FRX_minloss = trade.pnl;
+                }   
+                FRX_lossCount++;
+            }else if (trade.winlossdraw == "DRAW" && trade.region == "FOREX") {
+                FRX_brokerage += trade.brokerage;
             }
 
-            if (trade.pnl < minloss) {
-                minloss = trade.pnl;
+            // Check for max and min profit for IND
+            if (trade.pnl > IND_maxProfit  && trade.region=="IND" && IND_maxProfit!=0) {
+                IND_maxProfit = trade.pnl;
+            }
+
+            if (trade.pnl < IND_minloss && trade.region=="IND"&& IND_minloss!=0) {
+                IND_minloss = trade.pnl;
+            }
+
+            // Check for max and min profit for FOREX
+            if (trade.pnl > FRX_maxProfit && trade.region=="FOREX" && FRX_maxProfit!=0) {
+                FRX_maxProfit = trade.pnl;
+            }
+
+            if (trade.pnl < FRX_minloss && trade.region=="FOREX" && FRX_minloss!=0) {
+                FRX_minloss = trade.pnl;
             }
         });
 
-        console.log(minloss,maxProfit)
         const totalTrades = trades.length;
-        const winPercentage = ((winCount / totalTrades) * 100).toFixed(0);
-        const lossPercentage = ((lossCount / totalTrades) * 100).toFixed(0);
-        const avgPnl = (totalProfit-totalLoss)
-        const winRatio = `${winCount}/${trades.length}`;
+        const IND_winPercentage = ((IND_winCount / totalTrades) * 100).toFixed(0);
+        const IND_lossPercentage = ((IND_lossCount / totalTrades) * 100).toFixed(0);
+        const IND_totalPnl = (IND_totalProfit - IND_totalLoss) - IND_brokerage;
+        const IND_winRatio = `${IND_winCount}/${trades.length}`;
+
+        const FRX_winPercentage = ((FRX_winCount / totalTrades) * 100).toFixed(0);
+        const FRX_lossPercentage = ((FRX_lossCount / totalTrades) * 100).toFixed(0);
+        const FRX_totalPnl = (FRX_totalProfit - FRX_totalLoss) - FRX_brokerage;
+        const FRX_winRatio = `${FRX_winCount}/${trades.length}`;
         
 
         return res.status(STATUS_CODE.SUCCESS).json({
             msg: "successfully",
             data: {
-                avgPnl: avgPnl,
-                winPercentage: winPercentage,
-                lossPercentage: lossPercentage,
-                winRatio: winRatio,
-                totalProfit: totalProfit,
-                totalLoss: totalLoss,
-                maxProfit: maxProfit,
-                minloss: minloss,
+                IND_totalPnl: IND_totalPnl,
+                IND_winPercentage: IND_winPercentage,
+                IND_lossPercentage: IND_lossPercentage,
+                IND_winRatio: IND_winRatio,
+                IND_totalProfit: IND_totalProfit,
+                IND_totalLoss: IND_totalLoss,
+                IND_maxProfit: IND_maxProfit,
+                IND_minloss: IND_minloss,
+                IND_brokerage:IND_brokerage,
+
+                FRX_totalPnl: FRX_totalPnl,
+                FRX_winPercentage: FRX_winPercentage,
+                FRX_lossPercentage: FRX_lossPercentage,
+                FRX_winRatio: FRX_winRatio,
+                FRX_totalProfit: FRX_totalProfit,
+                FRX_totalLoss: FRX_totalLoss,
+                FRX_maxProfit: FRX_maxProfit,
+                FRX_minloss: FRX_minloss,
+                FRX_brokerage:FRX_brokerage
             },
         });
     } catch (error) {

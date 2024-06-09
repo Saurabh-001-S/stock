@@ -19,6 +19,11 @@ enum entryTimeFrame {
   MIN15
 }
 
+enum Region {
+  FOREX
+  IND
+}
+
 model User {
   id       Int     @id @unique @default(autoincrement())
   username String  @unique
@@ -37,6 +42,8 @@ model Trade {
   description    String
   pnl            Int
   winlossdraw    WinLossOrDraw
+  brokerage      Int            @default(0)
+  region         Region         @default(IND)
   User           User?          @relation(fields: [userId], references: [id])
   image          String         @default("")
   userId         Int?
