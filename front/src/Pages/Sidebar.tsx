@@ -19,7 +19,7 @@ const Sidebar = () => {
       );
       if (res.status == 200) {
         setStat(res.data.data);
-        console.log(res.data.data);
+        // console.log(res.data.data);
       }
     } catch (error) {
       console.error("Error updating entry", error);
@@ -52,7 +52,7 @@ const Sidebar = () => {
                 <div className="pb-2">
                   <h3 className={cardH3}>Total PNL</h3>
                   <p className={`${cardP} text-white font`}>
-                    {stat.IND_avgPnl}
+                    {stat.IND_totalPnl}
                   </p>
                 </div>
                 <div className="pb-2">
@@ -109,7 +109,7 @@ const Sidebar = () => {
                 <div className="pb-2">
                   <h3 className={cardH3}>Total PNL</h3>
                   <p className={`${cardP} text-white font`}>
-                    {stat.FRX_avgPnl}
+                    {stat.FRX_totalPnl}
                   </p>
                 </div>
                 <div className="pb-2">

@@ -11,7 +11,14 @@ const timeframe = {
   HOUR1: "1 Hour",
 };
 
-const Traderow: React.FC = memo(({ filterQuery }) => {
+const Traderow: React.FC<{
+  filterQuery: {
+    winlossdraw: string;
+    region: string;
+    startDate: string;
+    endDate: string;
+  };
+}> = memo(({ filterQuery }) => {
   const [trade, setTrade] = useState([]);
   const [modal, setModal] = useState(false);
   const [show, setShow] = useState("Img");
@@ -28,13 +35,12 @@ const Traderow: React.FC = memo(({ filterQuery }) => {
   };
 
   const handleView = (url: string) => {
-    // console.log("view", url);
     setImg(url);
     setModal(true);
     setShow("Img");
   };
 
-  const fetchentry = async () => {
+  const fetchEntries = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("No token found in localStorage.");
@@ -52,7 +58,6 @@ const Traderow: React.FC = memo(({ filterQuery }) => {
       );
 
       if (res.status === 200) {
-        console.log(res.data.data);
         const tradeEntries = res.data.data.map((data) => ({
           id: data.id,
           contract: data.contract,
@@ -67,7 +72,6 @@ const Traderow: React.FC = memo(({ filterQuery }) => {
           region: data.region,
         }));
         setTrade(tradeEntries);
-        return tradeEntries;
       } else {
         console.error(`Unexpected response status: ${res.status}`);
       }
@@ -77,7 +81,7 @@ const Traderow: React.FC = memo(({ filterQuery }) => {
   };
 
   useEffect(() => {
-    fetchentry();
+    fetchEntries();
   }, []);
 
   const handleDelete = async (id: number) => {
@@ -93,7 +97,7 @@ const Traderow: React.FC = memo(({ filterQuery }) => {
         }
       );
       if (res.status === 200) {
-        fetchentry();
+        fetchEntries();
       } else {
         console.error(`Unexpected response status: ${res.status}`);
       }
@@ -102,88 +106,108 @@ const Traderow: React.FC = memo(({ filterQuery }) => {
     }
   };
 
+  // Apply filters based on filterQuery prop
+  const filteredTrade = trade.filter((item) => {
+    if (filterQuery.winlossdraw && filterQuery.winlossdraw !== "Select") {
+      if (item.winlossdraw !== filterQuery.winlossdraw) {
+        return false;
+      }
+    }
+    if (filterQuery.region && filterQuery.region !== "Select") {
+      if (item.region !== filterQuery.region) {
+        return false;
+      }
+    }
+    if (filterQuery.startDate && filterQuery.startDate.trim() !== "") {
+      const startDate = new Date(filterQuery.startDate);
+      if (new Date(item.date) < startDate) {
+        return false;
+      }
+    }
+    if (filterQuery.endDate && filterQuery.endDate.trim() !== "") {
+      const endDate = new Date(filterQuery.endDate);
+      endDate.setHours(23, 59, 59); // Set end date to end of day
+      if (new Date(item.date) > endDate) {
+        return false;
+      }
+    }
+    return true;
+  });
+
   return (
     <>
       <Modal URL={img} show={show} modal={modal} setModal={setModal} />
       <tbody>
-        {trade === null ? (
-          <h3>Some thing wrong happen, Please refresh the page! </h3>
+        {filteredTrade.length === 0 ? (
+          <tr>
+            <td colSpan={13} className="text-center py-4">
+              No entries found for selected filters.
+            </td>
+          </tr>
         ) : (
-          trade
-            .filter((item) => {
-              return filterQuery == ""
-                ? item
-                : item.winlossdraw.includes(filterQuery);
-            })
-            .map((row, index) => (
-              <tr id={row.id}>
-                <td className={`${rowClass} text-white`}>{index + 1}</td>
-                <td className={`${rowClass} text-white`}>{row.contract}</td>
-                <td className={`${rowClass} text-white`}>
-                  {row.date.slice(0, 10)}
+          filteredTrade.map((row, index) => (
+            <tr key={row.id}>
+              <td className={`${rowClass} text-white`}>{index + 1}</td>
+              <td className={`${rowClass} text-white`}>{row.contract}</td>
+              <td className={`${rowClass} text-white`}>
+                {row.date.slice(0, 10)}
+              </td>
+              <td className={`${rowClass} text-white`}>
+                {timeframe[row.entryTimeFrame]}
+              </td>
+              <td className={`${rowClass} description text-white`}>
+                {row.entryReason}
+              </td>
+              <td className={`${rowClass} description text-white`}>
+                {row.exitReason}
+              </td>
+              <td className={`${rowClass} description text-white`}>
+                {row.description}
+              </td>
+              <td className={`text-white ${rowClass}`}>{row.pnl}</td>
+              {row.winlossdraw === "WIN" && (
+                <td className={`text-green-500 ${rowClass}`}>
+                  {row.winlossdraw}
                 </td>
-                <td className={`${rowClass} text-white`}>
-                  {timeframe[row.entryTimeFrame]}
+              )}
+              {row.winlossdraw === "LOSS" && (
+                <td className={`text-red-500 ${rowClass}`}>
+                  {row.winlossdraw}
                 </td>
-                <td className={`${rowClass} description text-white`}>
-                  {row.entryReason}
+              )}
+              {row.winlossdraw === "DRAW" && (
+                <td className={`text-gray-200 ${rowClass}`}>
+                  {row.winlossdraw}
                 </td>
-                <td className={`${rowClass} description text-white`}>
-                  {row.exitReason}
-                </td>
-                <td className={`${rowClass} description text-white`}>
-                  {row.description}
-                </td>
-                {/* <td className={rowClass}>{row.sl}</td> */}
-                <td className={`text-white ${rowClass}`}>{row.pnl}</td>
-                {row.winlossdraw === "WIN" && (
-                  <td className={`text-green-500 ${rowClass} `}>
-                    {row.winlossdraw}
-                  </td>
-                )}
-                {row.winlossdraw === "LOSS" && (
-                  <td className={`text-red-500 ${rowClass}`}>
-                    {row.winlossdraw}
-                  </td>
-                )}
-                {row.winlossdraw === "DRAW" && (
-                  <td className={`text-gray-200 ${rowClass} `}>
-                    {row.winlossdraw}
-                  </td>
-                )}
-                <td className={`${rowClass} text-white`}>{row.region}</td>
-                <td className={`${rowClass} text-center text-white`}>
-                  <button
-                    className="text-white bg-blue-600 px-2 py-1 rounded-md"
-                    onClick={() => {
-                      console.log(row.image);
-                      handleView(row.image);
-                    }}
-                  >
-                    View
-                  </button>
-                </td>
-                <td className={`text-white ${rowClass}`}>
-                  <button
-                    className="text-white bg-blue-600 px-2 py-1 rounded-md"
-                    onClick={() => handleEdit(row.id)}
-                  >
-                    Edit
-                  </button>
-                </td>
-                <td className={`text-white ${rowClass}`}>
-                  <button
-                    // className="text-white bg-blue-600 px-2 py-1 rounded-md"
-                    onClick={() => handleDelete(row.id)}
-                  >
-                    <Trash color="#b42727" />
-                  </button>
-                </td>
-              </tr>
-            ))
+              )}
+              <td className={`${rowClass} text-white`}>{row.region}</td>
+              <td className={`${rowClass} text-center text-white`}>
+                <button
+                  className="text-white bg-blue-600 px-2 py-1 rounded-md"
+                  onClick={() => handleView(row.image)}
+                >
+                  View
+                </button>
+              </td>
+              <td className={`text-white ${rowClass}`}>
+                <button
+                  className="text-white bg-blue-600 px-2 py-1 rounded-md"
+                  onClick={() => handleEdit(row.id)}
+                >
+                  Edit
+                </button>
+              </td>
+              <td className={`text-white ${rowClass}`}>
+                <button onClick={() => handleDelete(row.id)}>
+                  <Trash color="#b42727" />
+                </button>
+              </td>
+            </tr>
+          ))
         )}
       </tbody>
     </>
   );
 });
+
 export default Traderow;
