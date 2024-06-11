@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Modal from "./Modal";
@@ -18,7 +18,7 @@ const Traderow: React.FC<{
     startDate: string;
     endDate: string;
   };
-}> = memo(({ filterQuery }) => {
+}> = forwardRef(({ filterQuery }, ref) => {
   const [trade, setTrade] = useState([]);
   const [modal, setModal] = useState(false);
   const [show, setShow] = useState("Img");
@@ -133,6 +133,10 @@ const Traderow: React.FC<{
     }
     return true;
   });
+
+  useImperativeHandle(ref, () => ({
+    fetchEntries,
+  }));
 
   return (
     <>

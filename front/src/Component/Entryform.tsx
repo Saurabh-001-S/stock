@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { memo, useEffect, useState, useRef } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 type Timeframe = {
@@ -32,7 +32,22 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
   const navigate = useNavigate();
   const [imageFile, setImageFile] = useState("");
   const { id } = useParams<{ id: string }>(); // Correct usage of useParams
+
+  // State to manage form input and initial form input
   const [formInput, setFormInput] = useState({
+    contract: "",
+    entryTimeFrame: "1 min",
+    entryReason: "",
+    exitReason: "",
+    description: "",
+    pnl: 0,
+    winlossdraw: "DRAW",
+    image: "",
+    brokerage: 0,
+    region: "",
+  });
+
+  const [initialFormInput, setInitialFormInput] = useState({
     contract: "",
     entryTimeFrame: "1 min",
     entryReason: "",
@@ -60,7 +75,6 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
   const handleImage = (e) => {
     const img = e.target.files?.[0];
     if (img) {
-      console.log(img.name);
       setImageFile(img.name);
     }
   };
@@ -84,7 +98,7 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
 
       if (res.status == 200) {
         const entry = res.data.data;
-        setFormInput({
+        const initialData = {
           contract: entry.contract,
           entryTimeFrame: Objecttimeframe[entry.entryTimeFrame],
           entryReason: entry.entryReason,
@@ -92,10 +106,12 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
           description: entry.description,
           pnl: entry.pnl,
           winlossdraw: entry.winlossdraw,
-          region: formInput.region,
-          brokerage: formInput.brokerage,
+          region: entry.region,
+          brokerage: entry.brokerage,
           image: entry.image,
-        });
+        };
+        setFormInput(initialData);
+        setInitialFormInput(initialData); // Set initial form input
       }
     } catch (error) {
       console.error("Error fetching trade entries:", error);
@@ -111,25 +127,39 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
   const handleForm = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("No token found in localStorage.");
+      return;
+    }
+
     if (id != null) {
       const tradeId: number = Number(id);
       setModal(false);
       try {
-        console.log(formInput);
+        const updatedFields: any = {};
+
+        // Track updated fields
+        Object.keys(formInput).forEach((key) => {
+          if (formInput[key] !== initialFormInput[key]) {
+            updatedFields[key] = formInput[key];
+          }
+        });
+
+        if (imageFile) {
+          updatedFields.image = `${imageFile}`;
+        }
+
+        // Special handling for specific fields
+        if (updatedFields.entryTimeFrame) {
+          updatedFields.entryTimeFrame = timeframes[formInput.entryTimeFrame];
+        }
+
         const res = await axios.put(
           "http://localhost:3000/api/v1/stockRoute/update-stockEntry",
           {
             id: tradeId,
-            contract: formInput.contract,
-            entryTimeFrame: timeframes[formInput.entryTimeFrame],
-            entryReason: formInput.entryReason,
-            exitReason: formInput.exitReason,
-            description: formInput.description,
-            pnl: Number(formInput.pnl),
-            winlossdraw: formInput.winlossdraw,
-            region: formInput.region,
-            brokerage: Number(formInput.brokerage),
-            image: `./assets/${imageFile}`,
+            ...updatedFields,
           },
           {
             headers: {
@@ -137,9 +167,8 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
             },
           }
         );
+
         if (res.status == 200) {
-          console.log(res.data.msg);
-        } else {
           console.log(res.data.msg);
         }
       } catch (error) {
@@ -160,7 +189,7 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
             winlossdraw: formInput.winlossdraw,
             region: formInput.region,
             brokerage: Number(formInput.brokerage),
-            image: `./assets/${imageFile}`,
+            image: `${imageFile}`,
           },
           {
             headers: {
@@ -170,11 +199,10 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
         );
 
         if (res.status == 200) {
-          console.log(res.data.data.msg);
           navigate("/");
         }
       } catch (error) {
-        console.error("Error updating entry", error);
+        console.error("Error adding entry", error);
         throw error; // Re-throw the error to be handled by the caller
       }
     }
@@ -381,7 +409,7 @@ const Entryform: React.FC<FormProps> = memo(({ setModal, Formtype }) => {
                   <select
                     id="region"
                     name="region"
-                    autoComplete="region"
+                    autoComplete="IND-FOREX"
                     className="block flex-1 border-2 bg-transparent py-1.5 pl-1 border-gray-300 rounded-md text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                     value={formInput.region}
                     onChange={handleChange}
