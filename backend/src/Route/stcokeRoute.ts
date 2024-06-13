@@ -78,7 +78,7 @@ stock.post('/add-stockEntry', authMiddleware, async (req: any, res: any) => {
 
 
 
-stock.put('/update-stockEntry', authMiddleware, async (req, res) => {
+stock.put('/update-stockEntry', authMiddleware, async (req: any, res: any) => {
     const prisma = new PrismaClient();
 
     try {
@@ -95,7 +95,7 @@ stock.put('/update-stockEntry', authMiddleware, async (req, res) => {
             });
         }
 
-        const updateData = {};
+        const updateData: any = {};
         Object.keys(req.body).forEach(key => {
             if (req.body[key] !== undefined && key !== 'id') {
                 updateData[key] = req.body[key];
@@ -255,8 +255,8 @@ stock.get('/statistics', authMiddleware, async (req: any, res: any) => {
         });
 
         const calculateStats = (regionStats: any) => {
-            const winPercentage = ((regionStats.winCount / regionStats.totalTrades) * 100).toFixed(0);
-            const lossPercentage = ((regionStats.lossCount / regionStats.totalTrades) * 100).toFixed(0);
+            const winPercentage = ((regionStats.winCount / (regionStats.winCount + regionStats.lossCount)) * 100).toFixed(0);
+            const lossPercentage = ((regionStats.lossCount / (regionStats.winCount + regionStats.lossCount)) * 100).toFixed(0);
             const totalPnl = (regionStats.totalProfit - regionStats.totalLoss) - regionStats.brokerage;
             const winRatio = `${regionStats.winCount}/${regionStats.totalTrades}`;
 
